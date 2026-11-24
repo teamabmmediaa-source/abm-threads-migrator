@@ -115,7 +115,15 @@ def probe(state, ids):
     import urllib.request
     ig, _ = clients()
     ids = ids or [i["ig_id"] for i in state["items"].values() if i.get("last_error")][:3]
+    report = state.setdefault("probe", {})
+    _print = print
+
+    def print(*a):  # noqa: A001 - mirror output into the state file so it can be read without log access
+        _print(*a)
+        report.setdefault(cur, []).append(" ".join(str(x) for x in a))
     for ig_id in ids:
+        cur = ig_id
+        report[ig_id] = []
         url = ig.video_url(ig_id)
         print(f"== {ig_id}: media_url {'present' if url else 'MISSING'}")
         if not url:
