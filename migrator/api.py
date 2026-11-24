@@ -63,16 +63,33 @@ def _request(method: str, url: str, params: dict, timeout: int = 60) -> dict:
         raise MetaError(_scrub(f"Network error: {e}"), transient=True) from None
 
 
+FB_GRAPH = "https://graph.facebook.com/v21.0"
+
+
 class InstagramClient:
-    """Instagram API with Instagram Login (graph.instagram.com)."""
+    """Instagram API, with either kind of token Meta issues:
+
+    * Instagram Login token (``IG…``) -> graph.instagram.com, account = "me".
+    * Facebook/system-user token (``EA…``, e.g. from "Unified login") -> graph.facebook.com,
+      account = the Instagram business account ID (IG_USER_ID). These never expire.
+    """
 
     def __init__(self, token: str, user_id: str = "me", base: str = IG_BASE):
+        self.fb = token.startswith("EA") or "graph.facebook.com" in base
+        if self.fb and "graph.instagram.com" in base:
+            base = FB_GRAPH
+        if self.fb and user_id == "me":
+            raise MetaError("This Instagram token is a Facebook/system-user token (EA...): also set the "
+                            "IG_USER_ID variable to the Instagram account ID.", transient=False, auth=True)
         self.token, self.user_id, self.base = token, user_id, base.rstrip("/")
 
     def _get(self, path: str, **params) -> dict:
         return _request("GET", f"{self.base}/{path}", {**params, "access_token": self.token})
 
     def profile(self) -> dict:
+        if self.fb:
+            p = self._get(self.user_id, fields="id,username")
+            return {"user_id": p.get("id"), "username": p.get("username")}
         return self._get("me", fields="user_id,username")
 
     def list_media(self) -> list[dict]:
@@ -91,7 +108,9 @@ class InstagramClient:
         """Fresh signed CDN URL of the original video file (they expire, so fetch at publish time)."""
         return self._get(media_id, fields="media_url,media_type").get("media_url")
 
-    def refresh_token(self) -> dict:
+    def refresh_token(self) -> dict | None:
+        if self.fb:
+            return None  # system-user tokens do not expire and cannot be refreshed
         return _request("GET", f"{self.base}/refresh_access_token",
                         {"grant_type": "ig_refresh_token", "access_token": self.token})
 

@@ -77,6 +77,9 @@ def refresh_tokens(state):
         except MetaError as e:
             runner.alert(state, f"Could not refresh the {name} token: {e}")
             continue
+        if res is None:
+            state["tokens"][f"{name}_expires_at"] = "never (system-user token)"
+            continue
         token, expires = res["access_token"], int(res.get("expires_in", 5184000))
         state["tokens"][f"{name}_expires_at"] = iso(now_utc() + timedelta(seconds=expires))
         out[secret] = token

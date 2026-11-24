@@ -59,6 +59,7 @@ jobs:
         env:
           PYTHONTZPATH: ""   # use the up-to-date tzdata package for Morocco's clock rules
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ vars.IG_USER_ID || '17841457881246030' }}   # @abm_media__drone__immobilier
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
           GH_PAT: ${{ secrets.GH_PAT }}
           CMD: ${{ steps.cmd.outputs.command }}
