@@ -114,9 +114,10 @@ def probe(state, ids):
     import tempfile
     import urllib.request
     ig, _ = clients()
-    ids = ids or [i["ig_id"] for i in state["items"].values() if i.get("last_error")][:3]
+    ids = ids or ([i["ig_id"] for i in state["items"].values() if i.get("last_error")][:3] or ["18109947838629122"])
     report = state.setdefault("probe", {})
-    _print = print
+    import builtins
+    _print = builtins.print
 
     def print(*a):  # noqa: A001 - mirror output into the state file so it can be read without log access
         _print(*a)
