@@ -31,7 +31,7 @@ a{color:var(--sch)}td.when{white-space:nowrap;font-variant-numeric:tabular-nums}
 <div class="tools"><input type="search" id="q" placeholder="Search captions or IDs…" aria-label="Search"></div>
 <div class="wrap"><table><thead><tr><th></th><th>Status</th><th>Threads time (Morocco)</th><th>Caption</th><th>Instagram post</th><th>Links</th></tr></thead><tbody id="rows"></tbody></table></div>
 </main><script>
-const D={"rows": [], "counts": {"published": 0, "scheduled": 0, "pending": 0, "failed": 0, "excluded": 0}, "approved": false, "approved_at": "", "generated": "Tue 24 Nov 2026 · 12:52", "last_sync": "", "finish": "", "next": "", "alerts": [], "accounts": {}, "tokens": {}, "slots": "10:00, 14:00, 20:00"};
+const D={"rows": [], "counts": {"published": 0, "scheduled": 0, "pending": 0, "failed": 0, "excluded": 0}, "approved": false, "approved_at": "", "generated": "Tue 24 Nov 2026 · 14:24", "last_sync": "", "finish": "", "next": "", "alerts": [], "accounts": {}, "tokens": {}, "slots": "10:00, 14:00, 20:00"};
 const C={published:["Published","--pub"],scheduled:["Scheduled","--sch"],pending:["Pending","--pen"],failed:["Failed","--fail"],excluded:["Excluded","--exc"]};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safe=u=>/^https:\/\//.test(u||"")?esc(u):"";
