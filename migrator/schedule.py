@@ -25,15 +25,19 @@ class Slots:
         self.tz = ZoneInfo(cfg["timezone"])
         self.times = sorted(dtime.fromisoformat(t) for t in cfg["daily_slots"])
         self.grace = timedelta(minutes=cfg["slot_grace_minutes"])
+        # One-off extra slots, e.g. "2026-11-24T16:25" (local time), on top of the daily ones.
+        self.extra = sorted(datetime.fromisoformat(x).replace(tzinfo=self.tz) for x in cfg.get("extra_slots", []))
 
     def iter_from(self, start: datetime):
         """Yield slots >= start, in order, as aware datetimes in the local zone."""
         local = start.astimezone(self.tz)
         day = local.date()
+        floor = local.replace(second=0, microsecond=0)
         while True:
-            for t in self.times:
-                s = datetime.combine(day, t, tzinfo=self.tz)
-                if s >= local.replace(second=0, microsecond=0):
+            todays = {datetime.combine(day, t, tzinfo=self.tz) for t in self.times}
+            todays |= {e for e in self.extra if e.date() == day}
+            for s in sorted(todays):
+                if s >= floor:
                     yield s
             day += timedelta(days=1)
 

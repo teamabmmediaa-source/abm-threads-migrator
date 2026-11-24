@@ -20,7 +20,7 @@ def at(y, mo, d, h, mi=0):
 class Base(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        self.cfg = {**runner.load_config(), "state_path": str(Path(self.tmp) / "state.json")}
+        self.cfg = {**runner.load_config(), "extra_slots": [], "state_path": str(Path(self.tmp) / "state.json")}
         self.clock = [at(2026, 11, 24, 9, 0)]
         self._orig = runner.now_utc
         runner.now_utc = lambda: self.clock[0]
