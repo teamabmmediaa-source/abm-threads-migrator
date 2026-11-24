@@ -109,6 +109,31 @@ OAUTH = {
 }
 
 
+def probe(state, ids):
+    """Diagnose videos without publishing: download from Instagram and print ffprobe specs."""
+    import tempfile
+    import urllib.request
+    ig, _ = clients()
+    ids = ids or [i["ig_id"] for i in state["items"].values() if i.get("last_error")][:3]
+    for ig_id in ids:
+        url = ig.video_url(ig_id)
+        print(f"== {ig_id}: media_url {'present' if url else 'MISSING'}")
+        if not url:
+            continue
+        with tempfile.NamedTemporaryFile(suffix=".mp4") as f:
+            req = urllib.request.Request(url, headers={"User-Agent": "threads-migrator/1.0"})
+            with urllib.request.urlopen(req, timeout=120) as r:
+                print("   HTTP", r.status, r.headers.get("Content-Type"), r.headers.get("Content-Length"), "bytes")
+                f.write(r.read())
+            f.flush()
+            if shutil.which("ffprobe"):
+                out = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                                      "format=format_name,duration,bit_rate,size:stream=codec_type,codec_name,"
+                                      "profile,width,height,r_frame_rate,pix_fmt,sample_rate,channels,bit_rate",
+                                      "-of", "default=nw=1", f.name], capture_output=True, text=True)
+                print("   " + (out.stdout or out.stderr).replace("\n", "\n   "))
+
+
 def connect(kind: str):
     o = OAUTH[kind]
     app_id = _env(f"{o['app']}_APP_ID", f"{kind.title()} app ID: ")
@@ -203,6 +228,8 @@ def main(argv=None):
             print(f"{cmd}d: {', '.join(args)}")
         elif cmd == "refresh-tokens":
             refresh_tokens(state)
+        elif cmd == "probe":
+            probe(state, args)
         elif cmd != "dashboard":
             raise SystemExit(f"Unknown command {cmd!r}. Try: python -m migrator help")
     finally:

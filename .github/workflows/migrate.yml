@@ -14,7 +14,7 @@ on:
         description: "What to do"
         type: choice
         default: verify
-        options: [verify, sync, run, approve, unapprove, retry-failed, exclude, include, refresh-tokens, dashboard]
+        options: [verify, probe, sync, run, approve, unapprove, retry-failed, exclude, include, refresh-tokens, dashboard]
       ids:
         description: "Instagram media IDs for exclude/include (space separated)"
         required: false
