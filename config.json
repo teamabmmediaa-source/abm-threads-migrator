@@ -16,8 +16,5 @@
   "state_path": "state/state.json",
   "dashboard_path": "docs/index.html",
   "dashboard_title": "ABM Media · Instagram → Threads",
-  "extra_slots": [
-    "2026-11-24T15:30",
-    "2026-11-24T16:05"
-  ]
+  "extra_slots": []
 }
