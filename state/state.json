@@ -1493,7 +1493,8 @@
  "probe": {
   "18109947838629122": [
    "== 18109947838629122: media_url present",
-   "   HTTP 200 video/mp4 1822218 bytes"
+   "   HTTP 200 video/mp4 1822218 bytes",
+   "   codec_name=h264\n   profile=Main\n   codec_type=video\n   width=200\n   height=360\n   pix_fmt=yuv420p\n   r_frame_rate=30/1\n   bit_rate=231261\n   codec_name=aac\n   profile=HE-AAC\n   codec_type=audio\n   sample_rate=48000\n   channels=2\n   r_frame_rate=0/0\n   bit_rate=72572\n   format_name=mov,mp4,m4a,3gp,3g2,mj2\n   duration=47.038708\n   size=1822218\n   bit_rate=309909\n   "
   ]
  },
  "tokens": {},
