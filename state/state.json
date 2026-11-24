@@ -1,0 +1,15 @@
+{
+ "accounts": {},
+ "alerts": [],
+ "approval": {
+  "approved": false,
+  "approved_at": null,
+  "approved_preview": []
+ },
+ "items": {},
+ "last_run": null,
+ "last_sync": null,
+ "tokens": {},
+ "used_slots": [],
+ "version": 1
+}

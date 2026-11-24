@@ -1,0 +1,15 @@
+{
+  "timezone": "Africa/Casablanca",
+  "daily_slots": ["10:00", "14:00", "20:00"],
+  "slot_grace_minutes": 180,
+  "include_feed_videos": true,
+  "auto_schedule_new": true,
+  "caption_limit": 500,
+  "max_attempts": 5,
+  "retry_base_minutes": 30,
+  "processing_wait_seconds": 300,
+  "container_timeout_hours": 20,
+  "state_path": "state/state.json",
+  "dashboard_path": "docs/index.html",
+  "dashboard_title": "ABM Media · Instagram → Threads"
+}

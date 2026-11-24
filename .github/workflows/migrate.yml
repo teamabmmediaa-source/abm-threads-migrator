@@ -1,0 +1,84 @@
+name: Instagram → Threads
+
+on:
+  schedule:
+    # Every 15 min around the three slots. 09–11, 13–15 and 19–21 UTC cover 10:00, 14:00
+    # and 20:00 Moroccan time whether Morocco is on UTC+0 or UTC+1. The script itself
+    # decides, using the IANA zone Africa/Casablanca, whether a slot is due.
+    - cron: "5,20,35,50 9-11,13-15,19-21 * * *"
+    # Weekly token refresh (Meta tokens last 60 days; refreshing extends them).
+    - cron: "17 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "What to do"
+        type: choice
+        default: verify
+        options: [verify, sync, run, approve, unapprove, retry-failed, exclude, include, refresh-tokens, dashboard]
+      ids:
+        description: "Instagram media IDs for exclude/include (space separated)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: threads-migrator   # never two runs at once → no double posting
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Choose command
+        id: cmd
+        env:
+          INPUT_COMMAND: ${{ inputs.command }}
+          INPUT_IDS: ${{ inputs.ids }}
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          if [ -n "$INPUT_COMMAND" ]; then cmd="$INPUT_COMMAND"
+          elif [ "$SCHEDULE" = "17 3 * * 1" ]; then cmd="refresh-tokens"
+          else cmd="run"; fi
+          if ! [[ "$INPUT_IDS" =~ ^[0-9\ ]*$ ]]; then echo "IDs must be numbers"; exit 1; fi
+          echo "command=$cmd" >> "$GITHUB_OUTPUT"
+          echo "ids=$INPUT_IDS" >> "$GITHUB_OUTPUT"
+
+      - name: Install time-zone data
+        run: pip install -q -r requirements.txt
+
+      - name: Run migrator
+        env:
+          PYTHONTZPATH: ""   # use the up-to-date tzdata package for Morocco's clock rules
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          GH_PAT: ${{ secrets.GH_PAT }}
+          CMD: ${{ steps.cmd.outputs.command }}
+          IDS: ${{ steps.cmd.outputs.ids }}
+        run: python -m migrator "$CMD" $IDS
+
+      - name: Save state and dashboard
+        if: always()
+        run: |
+          git config user.name "threads-migrator"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state docs
+          git diff --cached --quiet && exit 0
+          git commit -m "migrator: ${{ steps.cmd.outputs.command }} $(date -u +%FT%TZ)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep 5; done
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dashboard
+          path: docs/index.html
+          retention-days: 7

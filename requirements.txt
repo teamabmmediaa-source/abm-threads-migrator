@@ -1,0 +1,2 @@
+# Only the standard library is used. tzdata supplies Morocco's time-zone rules on Windows.
+tzdata
